@@ -17,17 +17,13 @@ DatabaseFactory get databaseFactoryWeb => databaseFactoryWebImpl;
 /// Define a default `DatabaseFactory`
 class SqflitePluginWeb extends PlatformInterface {
   static final _readyCompleter = Completer<bool>();
+  /// Shows if the Sql.js library has been loaded
   static Future<bool> isReady;
 
   /// Registers the default database factory.
   static void registerWith(Registrar registrar) {
     isReady = _readyCompleter.future;
     html.window.addEventListener('sqflite_web_ready', (_) => _readyCompleter.complete(true));
-
-    /// Set the default database factory to use.
-    /// Currently calling an on-purpose deprecated helper.
-    // ignore: deprecated_member_use
-//    setMockDatabaseFactory(databaseFactoryWeb);
 
     final body = html.window.document.querySelector('body');
     // Hot reload would add it again

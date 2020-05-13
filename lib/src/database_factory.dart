@@ -7,7 +7,6 @@ DatabaseFactory _databaseFactoryWebImpl;
 /// The web database factory.
 DatabaseFactory get databaseFactoryWebImpl {
   return _databaseFactoryWebImpl ??= DatabaseFactoryWeb();
-//  return _databaseFactoryWebImpl ??= buildDatabaseFactory(invokeMethod: (method, [arguments]) => DatabaseFactoryWeb.invokeMethod(method, arguments));
 }
 
 /// The web database factory.
