@@ -22,7 +22,10 @@ external void _dbOpen(Uint8List data);
 external void _dbClose();
 
 @JS('run')
-external void _dbRun(String sql, dynamic params);
+external void _dbRun(String sql);
+
+@JS('runParams')
+external void _dbRunWithParams(String sql, dynamic params);
 
 @JS('execute')
 external js.JsObject _dbExecute(String sql);
@@ -147,7 +150,7 @@ class SqfliteWebDatabase extends Database {
     );
 
     logSql(sql: builder.sql, sqlArguments: builder.arguments);
-    _dbRun(builder.sql, builder.arguments);
+    _dbRunWithParams(builder.sql, builder.arguments);
     return _getUpdatedRows();
   }
 
@@ -191,7 +194,7 @@ class SqfliteWebDatabase extends Database {
     );
 
     logSql(sql: builder.sql, sqlArguments: builder.arguments);
-    _dbRun(builder.sql, builder.arguments);
+    _dbRunWithParams(builder.sql, builder.arguments);
 
     var id = _getLastInsertId();
     if (logLevel >= sqfliteLogLevelSql) {
@@ -309,15 +312,14 @@ class SqfliteWebDatabase extends Database {
   }
 
   @override
-  Future<int> getVersion() {
-    // TODO: implement getVersion
-    throw UnimplementedError();
+  Future<int> getVersion() async {
+    return _dbExecuteScalar('PRAGMA user_version;');
   }
 
   @override
   Future<void> setVersion(int version) {
-    // TODO: implement setVersion
-    throw UnimplementedError();
+    _dbRun('PRAGMA user_version = $version;');
+    return null;
   }
 
   @override
