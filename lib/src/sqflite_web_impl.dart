@@ -197,7 +197,7 @@ class SqfliteWebDatabase extends Database {
     if (logLevel >= sqfliteLogLevelSql) {
       print('Inserted id $id');
     }
-    return 1; //*** id
+    return id;
   }
 
   @override
