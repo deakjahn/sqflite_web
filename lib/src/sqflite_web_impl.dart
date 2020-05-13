@@ -65,18 +65,6 @@ final _debug = false; // devWarning(true); // false
 /// Web log level.
 int logLevel = sqfliteLogLevelNone;
 
-/// Web operation.
-class SqfliteFfiOperation {
-  /// Method.
-  String method;
-
-  /// SQL command.
-  String sql;
-
-  /// SQL arguments.
-  List sqlArguments;
-}
-
 /// Web database
 class SqfliteWebDatabase extends Database {
   /// Create web database.
@@ -155,15 +143,15 @@ class SqfliteWebDatabase extends Database {
   }
 
   @override
+  @deprecated
   Future<T> devInvokeMethod<T>(String method, [arguments]) {
-    // TODO: implement devInvokeMethod
-    throw UnimplementedError();
+    throw UnimplementedError('deprecated');
   }
 
   @override
+  @deprecated
   Future<T> devInvokeSqlMethod<T>(String method, String sql, [List arguments]) {
-    // TODO: implement devInvokeSqlMethod
-    throw UnimplementedError();
+    throw UnimplementedError('deprecated');
   }
 
   /// Handle execute.
