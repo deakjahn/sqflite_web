@@ -1,0 +1,36 @@
+name: sqflite_web
+homepage: https://github.com/tekartik/sqflite/tree/master/sqflite_web
+description: sqflite web based implementation, for desktop and units tests.
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+
+  plugin_platform_interface: ^1.0.1
+  sqflite_common: '>=1.0.0 <3.0.0'
+  synchronized: '>=2.0.2 <4.0.0'
+  path: '>=1.5.1 <3.0.0'
+  meta: '>=1.1.8 <3.0.0'
+  js: ^0.6.1+1
+
+dev_dependencies:
+  pedantic:
+  test:
+  process_run: '>=0.10.7'
+
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: SqflitePluginWeb
+        fileName: sqflite_web.dart
+
+  assets:
+    - packages/sqflite_web/assets/require.js
+    - packages/sqflite_web/assets/sqflite_web.js
