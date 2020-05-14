@@ -8,7 +8,8 @@ import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 import 'package:meta/meta.dart';
 import 'package:sqflite_common/sqlite_api.dart';
-import 'package:sqflite_web/src/common/sql_builder.dart'; //TODO this should be importable directly from sqflite_common, included here temporarily for now
+import 'package:sqflite_common/src/sql_builder.dart'; // ignore: implementation_imports
+
 
 // https://sql-js.github.io/sql.js/documentation/class/Database.html
 
