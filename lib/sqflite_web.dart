@@ -13,14 +13,12 @@ import 'package:sqflite_web/src/database_factory.dart';
 DatabaseFactory get databaseFactoryWeb => databaseFactoryWebImpl;
 
 /// The Web plugin registration.
-///
-/// Define a default `DatabaseFactory`
 class SqflitePluginWeb extends PlatformInterface {
   static final _readyCompleter = Completer<bool>();
   /// Shows if the Sql.js library has been loaded
   static Future<bool> isReady;
 
-  /// Registers the default database factory.
+  /// Registers the Web database factory.
   static void registerWith(Registrar registrar) {
     isReady = _readyCompleter.future;
     html.window.addEventListener('sqflite_web_ready', (_) => _readyCompleter.complete(true));
