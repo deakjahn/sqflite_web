@@ -1,11 +1,11 @@
 {
-    "name": "example",
-    "short_name": "example",
+    "name": "sqflite_web_example",
+    "short_name": "sqflite_web_example",
     "start_url": ".",
     "display": "minimal-ui",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Demonstrates how to use the flutter_modeller plugin.",
+    "description": "Demonstrates how to use the sqflite_web plugin.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
