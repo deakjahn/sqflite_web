@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:html' as html;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -15,6 +14,7 @@ DatabaseFactory get databaseFactoryWeb => databaseFactoryWebImpl;
 /// The Web plugin registration.
 class SqflitePluginWeb extends PlatformInterface {
   static final _readyCompleter = Completer<bool>();
+
   /// Shows if the Sql.js library has been loaded
   static Future<bool> isReady;
 
@@ -32,12 +32,9 @@ class SqflitePluginWeb extends PlatformInterface {
       }
     }
 
-    if (kReleaseMode) {
-      // https://github.com/flutter/flutter/issues/56659
-      body.append(html.ScriptElement()
-        ..src = 'assets/packages/sqflite_web/assets/require.js'
-        ..type = 'application/javascript');
-    }
+    body.append(html.ScriptElement()
+      ..src = 'assets/packages/sqflite_web/assets/require.js'
+      ..type = 'application/javascript');
     body.append(html.ScriptElement()
       ..src = 'assets/packages/sqflite_web/assets/sqflite_web.js'
       ..type = 'application/javascript');
