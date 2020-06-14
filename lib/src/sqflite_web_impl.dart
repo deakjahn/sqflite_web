@@ -364,15 +364,18 @@ class SqfliteWebDatabase extends Database {
 /// Pack the result in the expected sqflite format.
 List<Map<String, dynamic>> packResult(js.JsObject result) {
   // SQL.js returns: [{columns:['a','b'], values:[[0,'hello'],[1,'world']]}]
-  final columns = getProperty(result, 'columns');
-  final values = getProperty(result, 'values');
-  // This is what sqflite expects
-  return [
-    {
-      'columns': columns.cast<String>(),
-      'rows': values,
-    }
-  ];
+  if(result != null) {
+    final columns = getProperty(result, 'columns');
+    final values = getProperty(result, 'values');
+    // This is what sqflite expects
+    return [
+      {
+        'columns': columns.cast<String>(),
+        'rows': values,
+      }
+    ];
+  }
+  return [];
 }
 
 /// Dart api wrapping an underlying prepared statement object from the sql.js
