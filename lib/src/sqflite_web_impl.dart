@@ -33,26 +33,29 @@ external js.JsObject _dbExecute(String sql);
 @JS('executeScalar')
 external int _dbExecuteScalar(String sql);
 
-@JS('prepare')
-external Statement _dbPrepare(String sql);
+@JS('stmt_prepare')
+external js.JsObject _dbPrepare(String sql);
 
-@JS('prepare')
-external Statement _dbPrepareParams(String sql, dynamic params);
+@JS('stmt_prepare')
+external js.JsObject _dbPrepareParams(String sql, dynamic params);
 
-@JS('bind')
-external bool _dbBind(js.JsObject statement, dynamic values);
+@JS('stmt_bind')
+external bool _dbStmtBind(js.JsObject statement, dynamic values);
 
-@JS('step')
-external bool _dbStep(js.JsObject statement);
+@JS('stmt_run')
+external void _dbStmtRun(js.JsObject statement, dynamic values);
 
-@JS('get')
-external js.JsObject _dbGet(js.JsObject statement, dynamic params);
+@JS('stmt_step')
+external bool _dbStmtStep(js.JsObject statement);
 
-@JS('getColumnNames')
-external js.JsArray _dbGetColumnNames(js.JsObject statement);
+@JS('stmt_get')
+external js.JsObject _dbStmtGet(js.JsObject statement, dynamic params);
 
-@JS('free')
-external void _dbFree(js.JsObject statement);
+@JS('stmt_getColumnNames')
+external js.JsArray _dbStmtGetColumnNames(js.JsObject statement);
+
+@JS('stmt_free')
+external void _dbStmtFree(js.JsObject statement);
 
 @JS('getRowsModified')
 external int _dbGetRowsModified();
@@ -103,12 +106,9 @@ class SqfliteWebDatabase extends Database {
     // Fix issue #402
     if (_getUpdatedRows() == 0) {
       return 0;
+    } else {
+      return _dbExecuteScalar('SELECT last_insert_rowid();');
     }
-    final id = _dbExecuteScalar('SELECT last_insert_rowid();');
-    if (logLevel >= sqfliteLogLevelSql) {
-      print('Inserted $id');
-    }
-    return id;
   }
 
   /// Return the count of updated rows.
@@ -159,10 +159,9 @@ class SqfliteWebDatabase extends Database {
   Future<void> execute(String sql, [List sqlArguments]) {
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
-      var preparedStatement = _dbPrepare(sql);
+      var preparedStatement = Statement(_dbPrepare(sql));
       try {
         preparedStatement.executeWith(sqlArguments);
-        return null;
       } finally {
         preparedStatement.free();
       }
@@ -216,10 +215,9 @@ class SqfliteWebDatabase extends Database {
   Future<int> rawDelete(String sql, [List sqlArguments]) async {
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
-      var preparedStatement = _dbPrepare(sql);
+      var preparedStatement = Statement(_dbPrepare(sql));
       try {
         preparedStatement.executeWith(sqlArguments);
-        return null;
       } finally {
         preparedStatement.free();
       }
@@ -234,10 +232,9 @@ class SqfliteWebDatabase extends Database {
   Future<int> rawInsert(String sql, [List sqlArguments]) async {
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
-      var preparedStatement = _dbPrepare(sql);
+      var preparedStatement = Statement(_dbPrepare(sql));
       try {
         preparedStatement.executeWith(sqlArguments);
-        return null;
       } finally {
         preparedStatement.free();
       }
@@ -258,7 +255,7 @@ class SqfliteWebDatabase extends Database {
 
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
-      var preparedStatement = _dbPrepare(sql);
+      var preparedStatement = Statement(_dbPrepare(sql));
       try {
         List<String> columnNames;
         final rows = [];
@@ -285,10 +282,9 @@ class SqfliteWebDatabase extends Database {
   Future<int> rawUpdate(String sql, [List sqlArguments]) async {
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
-      var preparedStatement = _dbPrepare(sql);
+      var preparedStatement = Statement(_dbPrepare(sql));
       try {
         preparedStatement.executeWith(sqlArguments);
-        return null;
       } finally {
         preparedStatement.free();
       }
@@ -364,7 +360,7 @@ class SqfliteWebDatabase extends Database {
 /// Pack the result in the expected sqflite format.
 List<Map<String, dynamic>> packResult(js.JsObject result) {
   // SQL.js returns: [{columns:['a','b'], values:[[0,'hello'],[1,'world']]}]
-  if(result != null) {
+  if (result != null) {
     final columns = getProperty(result, 'columns');
     final values = getProperty(result, 'values');
     // This is what sqflite expects
@@ -374,30 +370,35 @@ List<Map<String, dynamic>> packResult(js.JsObject result) {
         'rows': values,
       }
     ];
+  } else {
+    return [];
   }
-  return [];
 }
 
 /// Dart api wrapping an underlying prepared statement object from the sql.js
 /// library.
 class Statement {
-  Statement._(this._obj);
+  /// Create new Statement from JS object
+  Statement(this._obj);
 
   final js.JsObject _obj;
 
   /// Executes this statement with the bound [args].
-  bool executeWith(List<dynamic> args) => _dbBind(_obj, args);
+  bool executeWith(List<dynamic> args) {
+    _dbStmtRun(_obj, args);
+    return true;
+  }
 
   /// Performs `step` on the underlying js api
-  bool step() => _dbStep(_obj);
+  bool step() => _dbStmtStep(_obj);
 
   /// Reads the current from the underlying js api
-  dynamic currentRow(List<dynamic> params) => _dbGet(_obj, params);
+  dynamic currentRow(List<dynamic> params) => _dbStmtGet(_obj, params);
 
   /// The columns returned by this statement. This will only be available after
   /// [step] has been called once.
-  List<String> columnNames() => _dbGetColumnNames(_obj).cast<String>();
+  List<String> columnNames() => _dbStmtGetColumnNames(_obj).cast<String>();
 
   /// Calls `free` on the underlying js api
-  void free() => _dbFree(_obj);
+  void free() => _dbStmtFree(_obj);
 }
