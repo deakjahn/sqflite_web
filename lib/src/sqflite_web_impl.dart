@@ -215,7 +215,7 @@ class SqfliteWebDatabase extends Database {
   Future<int> rawDelete(String sql, [List sqlArguments]) async {
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
-      var preparedStatement = Statement(_dbPrepare(sql));
+      var preparedStatement = Statement(_dbPrepareParams(sql, sqlArguments));
       try {
         preparedStatement.executeWith(sqlArguments);
       } finally {
@@ -232,7 +232,7 @@ class SqfliteWebDatabase extends Database {
   Future<int> rawInsert(String sql, [List sqlArguments]) async {
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
-      var preparedStatement = Statement(_dbPrepare(sql));
+      var preparedStatement = Statement(_dbPrepareParams(sql, sqlArguments));
       try {
         preparedStatement.executeWith(sqlArguments);
       } finally {
@@ -255,7 +255,7 @@ class SqfliteWebDatabase extends Database {
 
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
-      var preparedStatement = Statement(_dbPrepare(sql));
+      var preparedStatement = Statement(_dbPrepareParams(sql, sqlArguments));
       try {
         List<String> columnNames;
         final rows = [];
