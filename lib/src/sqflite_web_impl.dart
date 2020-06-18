@@ -381,19 +381,6 @@ List<Map<String, dynamic>> toSqfliteFormat(List columns, List values) {
   return dataList;
 }
 
-/// Pack the result in the expected sqflite format.
-List<Map<String, dynamic>> toSqfliteFormat(List columns, List values) {
-  List<Map<String, dynamic>> dataList = List();
-  for(var row = 0; row < values.length; row++) {
-    Map<String, dynamic> dataRow = Map();
-    for(var col = 0; col < columns.length; col++) {
-      dataRow[columns[col]] = values[row][col];
-    }
-    dataList.add(dataRow);
-  }
-  return dataList;
-}
-
 /// Dart api wrapping an underlying prepared statement object from the sql.js
 /// library.
 class Statement {
