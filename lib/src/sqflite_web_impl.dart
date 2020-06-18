@@ -266,7 +266,9 @@ class SqfliteWebDatabase extends Database {
         }
 
         columnNames ??= []; // assume no column names when there were no rows
-        return toSqfliteFormat(columnNames, rows);
+        return [
+          {'columns': columnNames, 'rows': rows}
+        ];
       } finally {
         preparedStatement.free();
       }
@@ -355,30 +357,22 @@ class SqfliteWebDatabase extends Database {
   String toString() => toDebugMap().toString();
 }
 
-/// Convert to expected sqflite format.
+/// Pack the result in the expected sqflite format.
 List<Map<String, dynamic>> packResult(js.JsObject result) {
   // SQL.js returns: [{columns:['a','b'], values:[[0,'hello'],[1,'world']]}]
   if (result != null) {
     final columns = getProperty(result, 'columns');
     final values = getProperty(result, 'values');
     // This is what sqflite expects
-    return toSqfliteFormat(columns, values);
+    return [
+      {
+        'columns': columns.cast<String>(),
+        'rows': values,
+      }
+    ];
   } else {
     return [];
   }
-}
-
-/// Pack the result in the expected sqflite format.
-List<Map<String, dynamic>> toSqfliteFormat(List columns, List values) {
-  List<Map<String, dynamic>> dataList = List();
-  for(var row = 0; row < values.length; row++) {
-    Map<String, dynamic> dataRow = Map();
-    for(var col = 0; col < columns.length; col++) {
-      dataRow[columns[col]] = values[row][col];
-    }
-    dataList.add(dataRow);
-  }
-  return dataList;
 }
 
 /// Dart api wrapping an underlying prepared statement object from the sql.js
