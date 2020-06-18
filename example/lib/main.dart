@@ -24,7 +24,7 @@ Future main() async {
   print(result); // [{columns: [id, title], rows: [[1, Product 1], [2, Product 2], [3, Product 3]]}]
 
   result = await db.rawQuery('SELECT * FROM Product WHERE title = ?', ['Product 1']);
-  print(result); // []
+  print(result); // [{columns: [id, title], rows: [[1, Product 1]]}]
 
   await db.close();
 }

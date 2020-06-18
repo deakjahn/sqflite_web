@@ -359,8 +359,8 @@ class SqfliteWebDatabase extends Database {
 List<Map<String, dynamic>> packResult(js.JsObject result) {
   // SQL.js returns: [{columns:['a','b'], values:[[0,'hello'],[1,'world']]}]
   if (result != null) {
-    final columns = getProperty(result, 'columns');
-    final values = getProperty(result, 'values');
+    final columns = getProperty(result, 'columns') as List;
+    final values = getProperty(result, 'values') as List;
     // This is what sqflite expects
     return toSqfliteFormat(columns, values);
   } else {
@@ -370,11 +370,11 @@ List<Map<String, dynamic>> packResult(js.JsObject result) {
 
 /// Pack the result in the expected sqflite format.
 List<Map<String, dynamic>> toSqfliteFormat(List columns, List values) {
-  List<Map<String, dynamic>> dataList = List();
-  for(var row = 0; row < values.length; row++) {
-    Map<String, dynamic> dataRow = Map();
-    for(var col = 0; col < columns.length; col++) {
-      dataRow[columns[col]] = values[row][col];
+  final dataList = <Map<String, dynamic>>[];
+  for (var row = 0; row < values.length; row++) {
+    final dataRow = <String, dynamic>{};
+    for (var col = 0; col < columns.length; col++) {
+      dataRow[columns[col].toString()] = values[row][col];
     }
     dataList.add(dataRow);
   }
