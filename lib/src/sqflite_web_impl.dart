@@ -403,7 +403,7 @@ class Statement {
 
   /// The columns returned by this statement. This will only be available after
   /// [step] has been called once.
-  List<String> columnNames() => _dbStmtGetColumnNames(_obj).cast<String>();
+  List<String> columnNames() => List.from(_dbStmtGetColumnNames(_obj));
 
   /// Calls `free` on the underlying js api
   void free() => _dbStmtFree(_obj);
