@@ -1,7 +1,7 @@
 name: sqflite_web
 homepage: https://github.com/tekartik/sqflite/tree/master/sqflite_web
 description: sqflite web based implementation, for desktop and units tests.
-version: 1.0.0+1
+version: 1.0.1
 
 environment:
   sdk: ">=2.7.0 <3.0.0"

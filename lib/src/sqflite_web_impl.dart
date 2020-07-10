@@ -1,6 +1,7 @@
 @JS('sqflite_web')
 library sqflite_web;
 
+import 'dart:async';
 import 'dart:js' as js;
 import 'dart:typed_data';
 
@@ -8,8 +9,16 @@ import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 import 'package:meta/meta.dart';
 import 'package:sqflite_common/sqlite_api.dart';
-import 'package:sqflite_common/src/sql_builder.dart'; // ignore: implementation_imports
+import 'package:sqflite_common/src/batch.dart' show SqfliteBatch, SqfliteDatabaseBatch;
+import 'package:sqflite_common/src/database.dart' show SqfliteDatabase;
+import 'package:sqflite_common/src/exception.dart' show SqfliteDatabaseException;
+import 'package:sqflite_common/src/sql_builder.dart' show ConflictAlgorithm, SqlBuilder;
+import 'package:sqflite_common/src/transaction.dart' show SqfliteTransaction;
+import 'package:sqflite_common/src/utils.dart' show getSqlInTransactionArgument;
+import 'package:sqflite_common/src/utils.dart' as utils;
+import 'package:synchronized/synchronized.dart';
 
+// ignore_for_file: implementation_imports
 // https://sql-js.github.io/sql.js/documentation/class/Database.html
 
 @JS('create')
@@ -69,7 +78,7 @@ final _debug = false; // devWarning(true); // false
 int logLevel = sqfliteLogLevelNone;
 
 /// Web database
-class SqfliteWebDatabase extends Database {
+class SqfliteWebDatabase extends SqfliteDatabase {
   /// Create web database.
   SqfliteWebDatabase({@required this.path, @required this.readOnly, @required this.logLevel}) {
     _dbCreate();
@@ -82,9 +91,17 @@ class SqfliteWebDatabase extends Database {
     _isOpen = true;
   }
 
-  /// P$ath.
+  /// Path.
   @override
   final String path;
+
+  /// Transaction reference count.
+  ///
+  /// Only set during inTransaction to allow transaction during open.
+  int transactionRefCount = 0;
+
+  /// Non-reentrant lock.
+  final Lock rawLock = Lock();
 
   /// If read-only
   final bool readOnly;
@@ -99,6 +116,12 @@ class SqfliteWebDatabase extends Database {
 
   @override
   bool get isOpen => _isOpen;
+
+  @override
+  SqfliteDatabase get db => this;
+
+  /// Set when parsing BEGIN and COMMIT/ROLLBACK
+  bool inTransaction = false;
 
   /// Last insert id.
   int _getLastInsertId() {
@@ -299,22 +322,12 @@ class SqfliteWebDatabase extends Database {
   }
 
   @override
-  Future<void> setVersion(int version) {
+  Future<void> setVersion(int version) async {
     _dbRun('PRAGMA user_version = $version;');
-    return null;
   }
 
   @override
-  Batch batch() {
-    // TODO: implement batch
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<T> transaction<T>(Future<T> Function(Transaction txn) action, {bool exclusive}) {
-    // TODO: implement transaction
-    throw UnimplementedError();
-  }
+  Batch batch() => SqfliteDatabaseBatch(this);
 
   @override
   Future<int> update(String table, Map<String, dynamic> values, {String where, List whereArgs, ConflictAlgorithm conflictAlgorithm}) async {
@@ -353,6 +366,144 @@ class SqfliteWebDatabase extends Database {
 
   @override
   String toString() => toDebugMap().toString();
+
+  @override
+  void checkNotClosed() {
+    if (!isOpen) {
+      throw SqfliteDatabaseException('error database_closed', null);
+    }
+  }
+
+  @override
+  Future<SqfliteDatabase> doOpen(OpenDatabaseOptions options) async {
+    _dbCreate();
+    _isOpen = true;
+    return this;
+  }
+
+  @override
+  Future<void> doClose() async => close();
+
+  @override
+  Future<T> transaction<T>(Future<T> Function(Transaction txn) action, {bool exclusive}) async {
+    checkNotClosed();
+    return txnWriteSynchronized<T>(txn, (Transaction txn) async {
+      bool ok;
+      if (transactionRefCount++ == 0) {
+        txn = await beginTransaction(exclusive: exclusive);
+      }
+      T result;
+      try {
+        result = await action(txn);
+        ok = true;
+      } finally {
+        if (--transactionRefCount == 0) {
+          final sqfliteTransaction = txn as SqfliteTransaction;
+          sqfliteTransaction.successful = ok;
+          await endTransaction(sqfliteTransaction);
+        }
+      }
+      return result;
+    });
+  }
+
+  /// synchronized call to the database
+  /// not re-entrant
+  Future<T> txnWriteSynchronized<T>(Transaction txn, Future<T> Function(Transaction txn) action) => txnSynchronized(txn, action);
+
+  /// synchronized call to the database
+  /// not re-entrant
+  /// Ugly compatibility step to not support older synchronized
+  /// mechanism
+  Future<T> txnSynchronized<T>(Transaction txn, Future<T> Function(Transaction txn) action) async {
+    // If in a transaction, execute right away
+    if (txn != null) {
+      return await action(txn);
+    } else {
+      // Simple timeout warning if we cannot get the lock after XX seconds
+      final handleTimeoutWarning = (utils.lockWarningDuration != null && utils.lockWarningCallback != null);
+      Completer<dynamic> timeoutCompleter;
+      if (handleTimeoutWarning) {
+        timeoutCompleter = Completer<dynamic>();
+      }
+
+      // Grab the lock
+      final operation = rawLock.synchronized(() {
+        if (handleTimeoutWarning) {
+          timeoutCompleter.complete();
+        }
+        return action(txn);
+      });
+      // Simply warn the developer as this could likely be a deadlock
+      if (handleTimeoutWarning) {
+        // ignore: unawaited_futures
+        timeoutCompleter.future.timeout(utils.lockWarningDuration, onTimeout: () {
+          utils.lockWarningCallback();
+        });
+      }
+      return await operation;
+    }
+  }
+
+  @override
+  Future<SqfliteTransaction> beginTransaction({bool exclusive}) async {
+    final txn = SqfliteTransaction(this);
+    // never create transaction in read-only mode
+    if (readOnly != true) {
+      await txnExecute<dynamic>(txn, (exclusive == true) ? 'BEGIN EXCLUSIVE' : 'BEGIN IMMEDIATE');
+    }
+    return txn;
+  }
+
+  @override
+  Future<void> endTransaction(SqfliteTransaction txn) async {
+    // never commit transaction in read-only mode
+    if (readOnly != true) {
+      await txnExecute<dynamic>(txn, (txn.successful == true) ? 'COMMIT' : 'ROLLBACK');
+    }
+  }
+
+  @override
+  SqfliteTransaction get txn => null; //???
+
+  @override
+  Future<List> txnApplyBatch(SqfliteTransaction txn, SqfliteBatch batch, {bool noResult, bool continueOnError}) {
+    // TODO: implement txnApplyBatch
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<T> txnExecute<T>(SqfliteTransaction txn, String sql, [List arguments]) {
+    return txnWriteSynchronized<T>(txn, (_) {
+      var inTransactionChange = getSqlInTransactionArgument(sql);
+      if (inTransactionChange ?? false) {
+        inTransactionChange = true;
+        inTransaction = true;
+      } else if (inTransactionChange == false) {
+        inTransactionChange = false;
+        inTransaction = false;
+      }
+      return txnWriteSynchronized(txn, (_) async {
+        await execute(sql, arguments);
+        return null;
+      });
+    });
+  }
+
+  @override
+  Future<int> txnRawInsert(SqfliteTransaction txn, String sql, List arguments) {
+    return txnWriteSynchronized(txn, (_) => rawInsert(sql, arguments));
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> txnRawQuery(SqfliteTransaction txn, String sql, List arguments) {
+    return txnWriteSynchronized(txn, (_) => rawQuery(sql, arguments));
+  }
+
+  @override
+  Future<int> txnRawUpdate(SqfliteTransaction txn, String sql, List arguments) {
+    return txnWriteSynchronized(txn, (_) => rawUpdate(sql, arguments));
+  }
 }
 
 /// Convert to expected sqflite format.
