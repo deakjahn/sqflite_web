@@ -10,11 +10,11 @@ import 'package:js/js_util.dart';
 import 'package:meta/meta.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common/src/batch.dart' show SqfliteBatch, SqfliteDatabaseBatch;
+import 'package:sqflite_common/src/collection_utils.dart' show BatchResults;
 import 'package:sqflite_common/src/database.dart' show SqfliteDatabase;
 import 'package:sqflite_common/src/exception.dart' show SqfliteDatabaseException;
 import 'package:sqflite_common/src/sql_builder.dart' show ConflictAlgorithm, SqlBuilder;
 import 'package:sqflite_common/src/transaction.dart' show SqfliteTransaction;
-import 'package:sqflite_common/src/utils.dart' show getSqlInTransactionArgument;
 import 'package:sqflite_common/src/utils.dart' as utils;
 import 'package:synchronized/synchronized.dart';
 
@@ -468,14 +468,39 @@ class SqfliteWebDatabase extends SqfliteDatabase {
 
   @override
   Future<List> txnApplyBatch(SqfliteTransaction txn, SqfliteBatch batch, {bool noResult, bool continueOnError}) {
-    // TODO: implement txnApplyBatch
-    throw UnimplementedError();
+    return txnWriteSynchronized(txn, (_) async {
+      final results = <dynamic>[];
+
+      for (final op in batch.operations) {
+        switch (op['method'] as String) {
+          case 'execute':
+            await txn.execute(op['sql'] as String, op['arguments'] as List<dynamic>);
+            break;
+          case 'insert':
+            final row = await txn.rawInsert(op['sql'] as String, op['arguments'] as List<dynamic>);
+            if (noResult != true) results.add(row);
+            break;
+          case 'query':
+            final result = await txn.rawQuery(op['sql'] as String, op['arguments'] as List<dynamic>);
+            if (noResult != true) results.add(result);
+            break;
+          case 'update':
+            final row = await txn.rawUpdate(op['sql'] as String, op['arguments'] as List<dynamic>);
+            if (noResult != true) results.add(row);
+            break;
+          default:
+            throw "Batch method ${op['method']} not supported";
+        }
+      }
+
+      return results.isEmpty ? null : BatchResults.from(results);
+    });
   }
 
   @override
   Future<T> txnExecute<T>(SqfliteTransaction txn, String sql, [List arguments]) {
     return txnWriteSynchronized<T>(txn, (_) {
-      var inTransactionChange = getSqlInTransactionArgument(sql);
+      var inTransactionChange = utils.getSqlInTransactionArgument(sql);
       if (inTransactionChange ?? false) {
         inTransactionChange = true;
         inTransaction = true;
