@@ -34,6 +34,6 @@ class DatabaseFactoryWeb extends DatabaseFactory {
   @override
   Future<Database> openDatabase(String path, {OpenDatabaseOptions options}) async {
     await SqflitePluginWeb.isReady;
-    return _db ??= SqfliteWebDatabase(path: path, readOnly: false, logLevel: sqfliteLogLevelVerbose);
+    return _db ??= SqfliteWebDatabase(path: path, readOnly: false, logLevel: sqfliteLogLevelNone);
   }
 }
