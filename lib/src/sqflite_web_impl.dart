@@ -339,8 +339,8 @@ class SqfliteWebDatabase extends SqfliteDatabase {
       conflictAlgorithm: conflictAlgorithm,
     );
 
-    logSql(sql: builder.sql);
-    _dbExecute(builder.sql);
+    logSql(sql: builder.sql, sqlArguments: builder.arguments);
+    _dbRunWithParams(builder.sql, builder.arguments);
     return _getUpdatedRows();
   }
 

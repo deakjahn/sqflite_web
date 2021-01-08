@@ -31,11 +31,14 @@ Future main() async {
 
     print(await db.getVersion()); // 10
 
-    result = await db.rawQuery('SELECT * FROM Product', []);
-    print(result); // [{columns: [id, title], rows: [[1, Product 1], [2, Product 2], [3, Product 3], [4, Product 4], [5, Product 5]]}]
+    var update = await db.update('Product', <String, dynamic>{'title': 'PRODUCT 1'}, where: 'id = ?', whereArgs: [1]);
+    print(update);
 
-    result = await db.rawQuery('SELECT * FROM Product WHERE title = ?', ['Product 1']);
-    print(result); // [{columns: [id, title], rows: [[1, Product 1]]}]
+    result = await db.rawQuery('SELECT * FROM Product', []);
+    print(result); // [{columns: [id, title], rows: [[1, PRODUCT 1], [2, Product 2], [3, Product 3], [4, Product 4], [5, Product 5]]}]
+
+    result = await db.rawQuery('SELECT * FROM Product WHERE title = ?', ['PRODUCT 1']);
+    print(result); // [{columns: [id, title], rows: [[1, PRODUCT 1]]}]
   }
 
   await db.close();
