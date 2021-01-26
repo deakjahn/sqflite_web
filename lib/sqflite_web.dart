@@ -21,22 +21,37 @@ class SqflitePluginWeb extends PlatformInterface {
   /// Registers the Web database factory.
   static void registerWith(Registrar registrar) {
     isReady = _readyCompleter.future;
-    html.window.addEventListener('sqflite_web_ready', (_) => _readyCompleter.complete(true));
+    html.window.addEventListener(
+        'sqflite_web_ready', (_) => _readyCompleter.complete(true));
 
     final body = html.window.document.querySelector('body');
-    // Hot reload would add it again
-    // ignore: omit_local_variable_types
+
+    // Add 'sqflite_web.js' (and 'require.js') dynamically if not already imported
+    // (this is needed to prevent hot reload or refresh to import it again and again)
+    var foundRequireJs = false;
+    var foundSqfliteWebJs = false;
     for (html.ScriptElement script in body.querySelectorAll('script')) {
-      if (script.src.contains('sqflite_web')) {
-        script.remove();
+      if (script.src
+          .contains('assets/packages/sqflite_web/assets/require.js')) {
+        foundRequireJs = true;
+      }
+      if (script.src
+          .contains('assets/packages/sqflite_web/assets/sqflite_web.js')) {
+        foundSqfliteWebJs = true;
       }
     }
 
-    body.append(html.ScriptElement()
-      ..src = 'assets/packages/sqflite_web/assets/require.js'
-      ..type = 'application/javascript');
-    body.append(html.ScriptElement()
-      ..src = 'assets/packages/sqflite_web/assets/sqflite_web.js'
-      ..type = 'application/javascript');
+    if (!foundRequireJs) {
+      print(
+          "<!> WARNING: Importing 'require.js' from sqlite_web, considere importing it directlty from your html file like this: '<script src=\"assets/packages/sqflite_web/assets/require.js\" type=\"application/javascript\"></script>'");
+      body.append(html.ScriptElement()
+        ..src = 'assets/packages/sqflite_web/assets/require.js'
+        ..type = 'application/javascript');
+    }
+    if (!foundSqfliteWebJs) {
+      body.append(html.ScriptElement()
+        ..src = 'assets/packages/sqflite_web/assets/sqflite_web.js'
+        ..type = 'application/javascript');
+    }
   }
 }
