@@ -34,3 +34,5 @@ flutter:
   assets:
     - packages/sqflite_web/assets/require.js
     - packages/sqflite_web/assets/sqflite_web.js
+    - packages/sqflite_web/assets/sql-wasm.wasm
+    - packages/sqflite_web/assets/sql-wasm.js
