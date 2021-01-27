@@ -1,6 +1,53 @@
 # sqflite_web
 
-These are the first steps to start a web version of [sqflite](https://pub.dev/packages/sqflite). Right now, it already runs and creates a test database and writes a few records.
+This is a web version of [sqflite](https://pub.dev/packages/sqflite).
+
+## Integration
+
+`pubspec.yaml`:
+
+```yaml
+dependencies:
+  # Database handling (if you want to support)
+  sqflite: ^1.3.2+2
+
+dev_dependencies:
+  # For sqflite web compatibility (will save the database IN MEMORY => not stored)
+  sqflite_web:
+    git:
+      url: https://github.com/FunnyLabz/sqflite_web.git
+      ref: master
+```
+
+`main.dart` (or any other dart file)
+
+```dart
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_web/sqflite_web.dart';
+
+void main() {
+  // Add web compatibility
+  if (kIsWeb) {
+    databaseFactory = databaseFactoryWeb;
+  }
+
+  (...)
+
+  // Open the database and do whatever you want
+  Database appDatabase;
+  if (kIsWeb) {
+    // Use the database from memory (no persistency on web...)
+    appDatabase = await databaseFactory.openDatabase(inMemoryDatabasePath);
+  } else {
+    // Other platforms (store on real file)
+     appDatabase = await openDatabase((await getApplicationDocumentsDirectory()).path + '/app.db');
+  }
+
+}
+```
+
+
+Right now, it already runs and creates a test database and writes a few records.
 
 Please, note that this is experimental. It's not on pub.dev and not automatically endorsed by Sqflite as the web implementation because these are just the first steps to see if it's feasible at all.
 
