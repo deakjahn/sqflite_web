@@ -2,13 +2,21 @@
 
 This is a web version of [sqflite](https://pub.dev/packages/sqflite).
 
+There is no persistence and copies of the same app running in different browser tabs would see different, separate databases.
+Use it if it fits your requirements and suggest solutions to the missing functionality if you have ideas but don't expect it to be a full Sqflite implementation on the web.
+
+Please, note that this is experimental. It's not on pub.dev and not automatically endorsed by Sqflite as the web implementation because of the persistency issue.
+
+The example runs and creates a test database and writes a few records on web console (F12->console on most web browser or directly on shell if running in debug).
+
+
 ## Integration
 
 `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  # Database handling (if you want to support)
+  # Database handling (if you want to support other platforms than web too)
   sqflite: ^1.3.2+2
 
 dev_dependencies:
@@ -24,35 +32,26 @@ dev_dependencies:
 ```dart
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_web/sqflite_web.dart';
+import 'package:flutter/foundation.dart';
 
 void main() {
-  // Add web compatibility
-  if (kIsWeb) {
-    databaseFactory = databaseFactoryWeb;
-  }
-
   (...)
 
   // Open the database and do whatever you want
   Database appDatabase;
   if (kIsWeb) {
     // Use the database from memory (no persistency on web...)
+    var databaseFactory = databaseFactoryWeb;
     appDatabase = await databaseFactory.openDatabase(inMemoryDatabasePath);
   } else {
     // Other platforms (store on real file)
      appDatabase = await databaseFactory.openDatabase((await getApplicationDocumentsDirectory()).path + '/app.db');
   }
 
+  (...)
 }
 ```
 
-
-Right now, it already runs and creates a test database and writes a few records.
-
-Please, note that this is experimental. It's not on pub.dev and not automatically endorsed by Sqflite as the web implementation because these are just the first steps to see if it's feasible at all.
-
-While the code itself is functional, the database stays in the memory. There is no persistence and copies of the same app running in different browser tabs would see different, separate databases.
-Use it if it fits your requirements and suggest solutions to the missing functionality if you have ideas but don't expect it to be a full Sqflite implementation on the web.
 
 ## Install
 
