@@ -40,7 +40,7 @@ void main() {
     appDatabase = await databaseFactory.openDatabase(inMemoryDatabasePath);
   } else {
     // Other platforms (store on real file)
-     appDatabase = await openDatabase((await getApplicationDocumentsDirectory()).path + '/app.db');
+     appDatabase = await databaseFactory.openDatabase((await getApplicationDocumentsDirectory()).path + '/app.db');
   }
 
 }
