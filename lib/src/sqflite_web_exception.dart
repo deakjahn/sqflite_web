@@ -1,11 +1,14 @@
 import 'package:meta/meta.dart';
-import 'package:sqflite_web/src/sqflite_import.dart';
-import 'package:sqflite_web/src/sqflite_web_impl.dart';
+
+import 'sqflite_import.dart';
+import 'sqflite_web_impl.dart';
 
 /// Web exception.
 class SqfliteWebException extends SqfliteDatabaseException {
   /// Web exception.
-  SqfliteWebException({@required this.code, @required String message, this.details}) : super(message, details);
+  SqfliteWebException(
+      {@required this.code, @required String message, this.details})
+      : super(message, details);
 
   /// The database.
   SqfliteWebDatabase database;

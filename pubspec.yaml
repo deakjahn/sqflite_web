@@ -1,28 +1,7 @@
 name: sqflite_web
-homepage: https://github.com/tekartik/sqflite/tree/master/sqflite_web
-description: sqflite web based implementation, for desktop and units tests.
-version: 1.0.1
-
-environment:
-  sdk: ">=2.7.0 <3.0.0"
-
-dependencies:
-  flutter:
-    sdk: flutter
-  flutter_web_plugins:
-    sdk: flutter
-
-  plugin_platform_interface: ^1.0.1
-  sqflite_common: '>=1.0.0 <3.0.0'
-  synchronized: '>=2.0.2 <4.0.0'
-  path: '>=1.5.1 <3.0.0'
-  meta: '>=1.1.8 <3.0.0'
-  js: ^0.6.1+1
-
-dev_dependencies:
-  pedantic:
-  test:
-  process_run: '>=0.10.7'
+homepage: https://github.com/FunnyLabz/sqflite_web
+description: sqflite web implementation (without database persistency)
+version: 1.1.0
 
 flutter:
   plugin:
@@ -31,8 +10,35 @@ flutter:
         pluginClass: SqflitePluginWeb
         fileName: sqflite_web.dart
 
-  assets:
-    - packages/sqflite_web/assets/require.js
-    - packages/sqflite_web/assets/sqflite_web.js
-    - packages/sqflite_web/assets/sql-wasm.wasm
-    - packages/sqflite_web/assets/sql-wasm.js
+        # Must be at web level to prevent to be included on other platforms !
+        assets:
+          - packages/sqflite_web/assets/require.js
+          - packages/sqflite_web/assets/sqflite_web.js
+          - packages/sqflite_web/assets/sql-wasm.wasm
+          - packages/sqflite_web/assets/sql-wasm.js
+
+environment:
+  sdk: ">=2.8.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_web_plugins:
+    sdk: flutter
+
+  plugin_platform_interface: ^1.0.1
+
+  # For Sqflite 'subplugin' compatibility
+  sqflite_common: '>=1.0.3 <2.0.0-0'
+  synchronized: '>=2.0.2 <4.0.0'
+  path: '>=1.5.1 <3.0.0'
+  meta: '>=1.1.8 <3.0.0'
+
+  # For Web implementation compatibility
+  js: ^0.6.2
+
+dev_dependencies:
+  pedantic:
+  test:
+  process_run: '>=0.10.7'

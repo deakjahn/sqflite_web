@@ -125,14 +125,14 @@ packages:
       name: sqflite_common
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.2+1"
+    version: "1.0.3+1"
   sqflite_web:
     dependency: "direct dev"
     description:
       path: ".."
       relative: true
     source: path
-    version: "1.0.1"
+    version: "1.1.0"
   stack_trace:
     dependency: transitive
     description:
