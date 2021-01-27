@@ -10,7 +10,7 @@ Please, note that this is experimental. It's not on pub.dev and not automaticall
 The example runs and creates a test database and writes a few records on web console (F12->console on most web browser or directly on shell if running in debug).
 
 
-## Integration
+## Install
 
 `pubspec.yaml`:
 
@@ -52,16 +52,12 @@ void main() {
 }
 ```
 
-
-## Install
-
-Add this line in `index.html`:
+Add this line in `web/index.html`:
 ```html
 <body>
   <script src="assets/packages/sqflite_web/assets/require.js" type="application/javascript"></script>
   (...)
 </body>
 ```
-
 Note: The `require.js` library will be added dynamically if you forget to add this line in `index.html`
 (but this will imply users do a 'refresh' of the web page every time they want to access it because of dynamic include issues).
