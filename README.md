@@ -23,7 +23,7 @@ dev_dependencies:
   # For sqflite web compatibility (will save the database IN MEMORY => not stored)
   sqflite_web:
     git:
-      url: https://github.com/FunnyLabz/sqflite_web.git
+      url: https://github.com/deakjahn/sqflite_web.git
       ref: master
 ```
 

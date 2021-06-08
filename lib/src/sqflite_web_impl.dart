@@ -7,21 +7,14 @@ import 'dart:typed_data';
 
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
-
-import 'package:meta/meta.dart';
-
 import 'package:sqflite_common/sqlite_api.dart';
-import 'package:sqflite_common/src/batch.dart'
-    show SqfliteBatch, SqfliteDatabaseBatch;
+import 'package:sqflite_common/src/batch.dart' show SqfliteBatch, SqfliteDatabaseBatch;
 import 'package:sqflite_common/src/collection_utils.dart' show BatchResults;
 import 'package:sqflite_common/src/database.dart' show SqfliteDatabase;
-import 'package:sqflite_common/src/exception.dart'
-    show SqfliteDatabaseException;
-import 'package:sqflite_common/src/sql_builder.dart'
-    show ConflictAlgorithm, SqlBuilder;
+import 'package:sqflite_common/src/exception.dart' show SqfliteDatabaseException;
+import 'package:sqflite_common/src/sql_builder.dart' show ConflictAlgorithm, SqlBuilder;
 import 'package:sqflite_common/src/transaction.dart' show SqfliteTransaction;
 import 'package:sqflite_common/src/utils.dart' as utils;
-
 import 'package:synchronized/synchronized.dart';
 
 // ignore_for_file: implementation_imports
@@ -86,18 +79,13 @@ int logLevel = sqfliteLogLevelNone;
 /// Web database
 class SqfliteWebDatabase extends SqfliteDatabase {
   /// Create web database.
-  SqfliteWebDatabase(
-      {@required this.path, @required this.readOnly, @required this.logLevel}) {
+  SqfliteWebDatabase({required this.path, required this.readOnly, required this.logLevel}) {
     _dbCreate();
     _isOpen = true;
   }
 
   /// Open web database from byte data.
-  SqfliteWebDatabase.fromData(
-      {@required this.path,
-      @required this.readOnly,
-      @required this.logLevel,
-      Uint8List data}) {
+  SqfliteWebDatabase.fromData({required this.path, required this.readOnly, required this.logLevel, required Uint8List data}) {
     _dbOpen(data);
     _isOpen = true;
   }
@@ -121,8 +109,7 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   final int logLevel;
 
   /// Debug map.
-  Map<String, dynamic> toDebugMap() =>
-      <String, dynamic>{'path': path, 'readOnly': readOnly};
+  Map<String, dynamic> toDebugMap() => <String, dynamic>{'path': path, 'readOnly': readOnly};
 
   bool _isOpen = false;
 
@@ -161,11 +148,11 @@ class SqfliteWebDatabase extends SqfliteDatabase {
     logResult(result: 'Closing database $this');
     _dbClose();
     _isOpen = false;
-    return null;
+    return Future.value();
   }
 
   @override
-  Future<int> delete(String table, {String where, List whereArgs}) async {
+  Future<int> delete(String table, {String? where, List? whereArgs}) async {
     final builder = SqlBuilder.delete(
       table,
       where: where,
@@ -185,13 +172,13 @@ class SqfliteWebDatabase extends SqfliteDatabase {
 
   @override
   @deprecated
-  Future<T> devInvokeSqlMethod<T>(String method, String sql, [List arguments]) {
+  Future<T> devInvokeSqlMethod<T>(String method, String sql, [List? arguments]) {
     throw UnimplementedError('deprecated');
   }
 
   /// Handle execute.
   @override
-  Future<void> execute(String sql, [List sqlArguments]) {
+  Future<void> execute(String sql, [List? sqlArguments]) {
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
       var preparedStatement = Statement(_dbPrepare(sql));
@@ -203,12 +190,11 @@ class SqfliteWebDatabase extends SqfliteDatabase {
     } else {
       _dbExecute(sql);
     }
-    return null;
+    return Future.value();
   }
 
   @override
-  Future<int> insert(String table, Map<String, dynamic> values,
-      {String nullColumnHack, ConflictAlgorithm conflictAlgorithm}) async {
+  Future<int> insert(String table, Map<String, dynamic> values, {String? nullColumnHack, ConflictAlgorithm? conflictAlgorithm}) async {
     final builder = SqlBuilder.insert(
       table,
       values,
@@ -227,16 +213,7 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> query(String table,
-      {bool distinct,
-      List<String> columns,
-      String where,
-      List whereArgs,
-      String groupBy,
-      String having,
-      String orderBy,
-      int limit,
-      int offset}) async {
+  Future<List<Map<String, dynamic>>> query(String table, {bool? distinct, List<String>? columns, String? where, List? whereArgs, String? groupBy, String? having, String? orderBy, int? limit, int? offset}) async {
     final builder = SqlBuilder.query(
       table,
       distinct: distinct,
@@ -257,7 +234,7 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   }
 
   @override
-  Future<int> rawDelete(String sql, [List sqlArguments]) async {
+  Future<int> rawDelete(String sql, [List? sqlArguments]) async {
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
       var preparedStatement = Statement(_dbPrepareParams(sql, sqlArguments));
@@ -274,7 +251,7 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   }
 
   @override
-  Future<int> rawInsert(String sql, [List sqlArguments]) async {
+  Future<int> rawInsert(String sql, [List? sqlArguments]) async {
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
       var preparedStatement = Statement(_dbPrepareParams(sql, sqlArguments));
@@ -295,15 +272,14 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> rawQuery(String sql,
-      [List sqlArguments]) async {
+  Future<List<Map<String, dynamic>>> rawQuery(String sql, [List? sqlArguments]) async {
     js.JsObject result;
 
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
       var preparedStatement = Statement(_dbPrepareParams(sql, sqlArguments));
       try {
-        List<String> columnNames;
+        List<String>? columnNames;
         final rows = [];
 
         while (preparedStatement.step()) {
@@ -323,7 +299,7 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   }
 
   @override
-  Future<int> rawUpdate(String sql, [List sqlArguments]) async {
+  Future<int> rawUpdate(String sql, [List? sqlArguments]) async {
     logSql(sql: sql, sqlArguments: sqlArguments);
     if (sqlArguments?.isNotEmpty ?? false) {
       var preparedStatement = Statement(_dbPrepare(sql));
@@ -353,10 +329,7 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   Batch batch() => SqfliteDatabaseBatch(this);
 
   @override
-  Future<int> update(String table, Map<String, dynamic> values,
-      {String where,
-      List whereArgs,
-      ConflictAlgorithm conflictAlgorithm}) async {
+  Future<int> update(String table, Map<String, dynamic> values, {String? where, List? whereArgs, ConflictAlgorithm? conflictAlgorithm}) async {
     final builder = SqlBuilder.update(
       table,
       values,
@@ -376,17 +349,16 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   }
 
   /// Log the result if needed.
-  void logResult({String result}) {
+  void logResult({String? result}) {
     if (result != null && (logLevel >= sqfliteLogLevelSql)) {
       print(result);
     }
   }
 
   /// Log the sql statement if needed.
-  void logSql({String sql, List sqlArguments, String result}) {
+  void logSql({String? sql, List? sqlArguments, String? result}) {
     if (logLevel >= sqfliteLogLevelSql) {
-      print(
-          '$sql${(sqlArguments?.isNotEmpty ?? false) ? ' $sqlArguments' : ''}');
+      print('$sql${(sqlArguments?.isNotEmpty ?? false) ? ' $sqlArguments' : ''}');
       logResult(result: result);
     }
   }
@@ -412,17 +384,16 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   Future<void> doClose() async => close();
 
   @override
-  Future<T> transaction<T>(Future<T> Function(Transaction txn) action,
-      {bool exclusive}) async {
+  Future<T> transaction<T>(Future<T> Function(Transaction txn) action, {bool? exclusive}) async {
     checkNotClosed();
-    return txnWriteSynchronized<T>(txn, (Transaction txn) async {
-      bool ok;
+    return txnWriteSynchronized<T>(txn, (Transaction? txn) async {
+      var ok = false;
       if (transactionRefCount++ == 0) {
         txn = await beginTransaction(exclusive: exclusive);
       }
       T result;
       try {
-        result = await action(txn);
+        result = await action(txn!);
         ok = true;
       } finally {
         if (--transactionRefCount == 0) {
@@ -437,24 +408,20 @@ class SqfliteWebDatabase extends SqfliteDatabase {
 
   /// synchronized call to the database
   /// not re-entrant
-  Future<T> txnWriteSynchronized<T>(
-          Transaction txn, Future<T> Function(Transaction txn) action) =>
-      txnSynchronized(txn, action);
+  Future<T> txnWriteSynchronized<T>(Transaction? txn, Future<T> Function(Transaction? txn) action) => txnSynchronized(txn, action);
 
   /// synchronized call to the database
   /// not re-entrant
   /// Ugly compatibility step to not support older synchronized
   /// mechanism
-  Future<T> txnSynchronized<T>(
-      Transaction txn, Future<T> Function(Transaction txn) action) async {
+  Future<T> txnSynchronized<T>(Transaction? txn, Future<T> Function(Transaction? txn) action) async {
     // If in a transaction, execute right away
     if (txn != null) {
       return await action(txn);
     } else {
       // Simple timeout warning if we cannot get the lock after XX seconds
-      final handleTimeoutWarning = (utils.lockWarningDuration != null &&
-          utils.lockWarningCallback != null);
-      Completer<dynamic> timeoutCompleter;
+      final handleTimeoutWarning = (utils.lockWarningDuration != null && utils.lockWarningCallback != null);
+      late Completer<dynamic> timeoutCompleter;
       if (handleTimeoutWarning) {
         timeoutCompleter = Completer<dynamic>();
       }
@@ -469,9 +436,8 @@ class SqfliteWebDatabase extends SqfliteDatabase {
       // Simply warn the developer as this could likely be a deadlock
       if (handleTimeoutWarning) {
         // ignore: unawaited_futures
-        timeoutCompleter.future.timeout(utils.lockWarningDuration,
-            onTimeout: () {
-          utils.lockWarningCallback();
+        timeoutCompleter.future.timeout(utils.lockWarningDuration!, onTimeout: () {
+          utils.lockWarningCallback!();
         });
       }
       return await operation;
@@ -479,12 +445,11 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   }
 
   @override
-  Future<SqfliteTransaction> beginTransaction({bool exclusive}) async {
+  Future<SqfliteTransaction> beginTransaction({bool? exclusive}) async {
     final txn = SqfliteTransaction(this);
     // never create transaction in read-only mode
     if (readOnly != true) {
-      await txnExecute<dynamic>(
-          txn, (exclusive == true) ? 'BEGIN EXCLUSIVE' : 'BEGIN IMMEDIATE');
+      await txnExecute<dynamic>(txn, (exclusive == true) ? 'BEGIN EXCLUSIVE' : 'BEGIN IMMEDIATE');
     }
     return txn;
   }
@@ -493,39 +458,33 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   Future<void> endTransaction(SqfliteTransaction txn) async {
     // never commit transaction in read-only mode
     if (readOnly != true) {
-      await txnExecute<dynamic>(
-          txn, (txn.successful == true) ? 'COMMIT' : 'ROLLBACK');
+      await txnExecute<dynamic>(txn, (txn.successful == true) ? 'COMMIT' : 'ROLLBACK');
     }
   }
 
   @override
-  SqfliteTransaction get txn => null; //???
+  SqfliteTransaction? get txn => null; //???
 
   @override
-  Future<List> txnApplyBatch(SqfliteTransaction txn, SqfliteBatch batch,
-      {bool noResult, bool continueOnError}) {
+  Future<List> txnApplyBatch(SqfliteTransaction txn, SqfliteBatch batch, {bool? noResult, bool? continueOnError}) {
     return txnWriteSynchronized(txn, (_) async {
       final results = <dynamic>[];
 
       for (final op in batch.operations) {
         switch (op['method'] as String) {
           case 'execute':
-            await txn.execute(
-                op['sql'] as String, op['arguments'] as List<dynamic>);
+            await txn.execute(op['sql'] as String, op['arguments'] as List<dynamic>);
             break;
           case 'insert':
-            final row = await txn.rawInsert(
-                op['sql'] as String, op['arguments'] as List<dynamic>);
+            final row = await txn.rawInsert(op['sql'] as String, op['arguments'] as List<dynamic>);
             if (noResult != true) results.add(row);
             break;
           case 'query':
-            final result = await txn.rawQuery(
-                op['sql'] as String, op['arguments'] as List<dynamic>);
+            final result = await txn.rawQuery(op['sql'] as String, op['arguments'] as List<dynamic>);
             if (noResult != true) results.add(result);
             break;
           case 'update':
-            final row = await txn.rawUpdate(
-                op['sql'] as String, op['arguments'] as List<dynamic>);
+            final row = await txn.rawUpdate(op['sql'] as String, op['arguments'] as List<dynamic>);
             if (noResult != true) results.add(row);
             break;
           default:
@@ -533,13 +492,12 @@ class SqfliteWebDatabase extends SqfliteDatabase {
         }
       }
 
-      return results.isEmpty ? null : BatchResults.from(results);
+      return results.isEmpty ? <dynamic>[] : BatchResults.from(results);
     });
   }
 
   @override
-  Future<T> txnExecute<T>(SqfliteTransaction txn, String sql,
-      [List arguments]) {
+  Future<T> txnExecute<T>(SqfliteTransaction? txn, String sql, [List? arguments]) {
     return txnWriteSynchronized<T>(txn, (_) {
       var inTransactionChange = utils.getSqlInTransactionArgument(sql);
       if (inTransactionChange ?? false) {
@@ -551,30 +509,29 @@ class SqfliteWebDatabase extends SqfliteDatabase {
       }
       return txnWriteSynchronized(txn, (_) async {
         await execute(sql, arguments);
-        return null;
+        return Future.value();
       });
     });
   }
 
   @override
-  Future<int> txnRawInsert(SqfliteTransaction txn, String sql, List arguments) {
+  Future<int> txnRawInsert(SqfliteTransaction? txn, String sql, List? arguments) {
     return txnWriteSynchronized(txn, (_) => rawInsert(sql, arguments));
   }
 
   @override
-  Future<List<Map<String, dynamic>>> txnRawQuery(
-      SqfliteTransaction txn, String sql, List arguments) {
+  Future<List<Map<String, dynamic>>> txnRawQuery(SqfliteTransaction? txn, String sql, List? arguments) {
     return txnWriteSynchronized(txn, (_) => rawQuery(sql, arguments));
   }
 
   @override
-  Future<int> txnRawUpdate(SqfliteTransaction txn, String sql, List arguments) {
+  Future<int> txnRawUpdate(SqfliteTransaction? txn, String sql, List? arguments) {
     return txnWriteSynchronized(txn, (_) => rawUpdate(sql, arguments));
   }
 }
 
 /// Convert to expected sqflite format.
-List<Map<String, dynamic>> packResult(js.JsObject result) {
+List<Map<String, dynamic>> packResult(js.JsObject? result) {
   // SQL.js returns: [{columns:['a','b'], values:[[0,'hello'],[1,'world']]}]
   if (result != null) {
     final columns = getProperty(result, 'columns') as List;
@@ -608,7 +565,7 @@ class Statement {
   final js.JsObject _obj;
 
   /// Executes this statement with the bound [args].
-  bool executeWith(List<dynamic> args) {
+  bool executeWith(List<dynamic>? args) {
     _dbStmtRun(_obj, args);
     return true;
   }
@@ -617,7 +574,7 @@ class Statement {
   bool step() => _dbStmtStep(_obj);
 
   /// Reads the current from the underlying js api
-  dynamic currentRow(List<dynamic> params) => _dbStmtGet(_obj, params);
+  dynamic currentRow(List<dynamic>? params) => _dbStmtGet(_obj, params);
 
   /// The columns returned by this statement. This will only be available after
   /// [step] has been called once.

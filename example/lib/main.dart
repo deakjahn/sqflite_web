@@ -37,17 +37,14 @@ Future main() async {
 
     print(await db.getVersion()); // 10
 
-    var update = await db.update(
-        'Product', <String, dynamic>{'title': 'PRODUCT 1'},
-        where: 'id = ?', whereArgs: [1]);
+    var update = await db.update('Product', <String, dynamic>{'title': 'PRODUCT 1'}, where: 'id = ?', whereArgs: [1]);
     print(update);
 
     result = await db.rawQuery('SELECT * FROM Product', []);
     // [{columns: [id, title], rows: [[1, PRODUCT 1], [2, Product 2], [3, Product 3], [4, Product 4], [5, Product 5]]}]
     print(result);
 
-    result = await db
-        .rawQuery('SELECT * FROM Product WHERE title = ?', ['PRODUCT 1']);
+    result = await db.rawQuery('SELECT * FROM Product WHERE title = ?', ['PRODUCT 1']);
     // [{columns: [id, title], rows: [[1, PRODUCT 1]]}]
     print(result);
   } else {

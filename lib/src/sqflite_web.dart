@@ -3,7 +3,6 @@ import 'dart:html' as html;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
 import 'package:sqflite_common/sqlite_api.dart';
 
 import 'database_factory.dart';
@@ -15,43 +14,38 @@ DatabaseFactory get databaseFactoryWeb => databaseFactoryWebImpl;
 
 /// The Web plugin registration.
 class SqflitePluginWeb extends PlatformInterface {
+  /// Constructor
+  SqflitePluginWeb() : super(token: _token);
+
+  static final _token = Object();
   static final _readyCompleter = Completer<bool>();
 
   /// Shows if the Sql.js library has been loaded
-  static Future<bool> isReady;
+  static late Future<bool> isReady;
 
   /// Registers the Web database factory.
   static void registerWith(Registrar registrar) {
     isReady = _readyCompleter.future;
-    html.window.addEventListener(
-        'sqflite_web_ready', (_) => _readyCompleter.complete(true));
-
-    final body = html.window.document.querySelector('body');
+    html.window.addEventListener('sqflite_web_ready', (_) => _readyCompleter.complete(true));
 
     // Add 'sqflite_web.js' (and 'require.js') dynamically if not already imported
     // (this is needed to prevent hot reload or refresh to import it again and again)
     var foundRequireJs = false;
     var foundSqfliteWebJs = false;
-    for (html.ScriptElement script in body.querySelectorAll('script')) {
-      if (script.src
-          .contains('assets/packages/sqflite_web/assets/require.js')) {
-        foundRequireJs = true;
-      }
-      if (script.src
-          .contains('assets/packages/sqflite_web/assets/sqflite_web.js')) {
-        foundSqfliteWebJs = true;
-      }
+    // ignore: omit_local_variable_types
+    for (html.ScriptElement script in html.document.body!.querySelectorAll('script')) {
+      if (script.src.contains('assets/packages/sqflite_web/assets/require.js')) foundRequireJs = true;
+      if (script.src.contains('assets/packages/sqflite_web/assets/sqflite_web.js')) foundSqfliteWebJs = true;
     }
 
     if (!foundRequireJs) {
-      print(
-          "<!> WARNING: Importing 'require.js' from sqlite_web, considere importing it directlty from your html file like this: '<script src=\"assets/packages/sqflite_web/assets/require.js\" type=\"application/javascript\"></script>'");
-      body.append(html.ScriptElement()
+      print("<!> WARNING: Importing 'require.js' from sqlite_web, consider importing it directlty from your html file like this: '<script src=\"assets/packages/sqflite_web/assets/require.js\" type=\"application/javascript\"></script>'");
+      html.document.body?.append(html.ScriptElement()
         ..src = 'assets/packages/sqflite_web/assets/require.js'
         ..type = 'application/javascript');
     }
     if (!foundSqfliteWebJs) {
-      body.append(html.ScriptElement()
+      html.document.body?.append(html.ScriptElement()
         ..src = 'assets/packages/sqflite_web/assets/sqflite_web.js'
         ..type = 'application/javascript');
     }

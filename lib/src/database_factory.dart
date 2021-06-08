@@ -3,7 +3,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'sqflite_web.dart';
 import 'sqflite_web_impl.dart';
 
-DatabaseFactory _databaseFactoryWebImpl;
+DatabaseFactory? _databaseFactoryWebImpl;
 
 /// The web database factory.
 DatabaseFactory get databaseFactoryWebImpl {
@@ -12,7 +12,7 @@ DatabaseFactory get databaseFactoryWebImpl {
 
 /// The web database factory.
 class DatabaseFactoryWeb extends DatabaseFactory {
-  SqfliteWebDatabase _db;
+  SqfliteWebDatabase? _db;
 
   @override
   Future<bool> databaseExists(String path) async {
@@ -29,14 +29,18 @@ class DatabaseFactoryWeb extends DatabaseFactory {
   @override
   Future<String> getDatabasesPath() async {
     //TODO
-    return null;
+    return '';
   }
 
   @override
-  Future<Database> openDatabase(String path,
-      {OpenDatabaseOptions options}) async {
+  Future<void> setDatabasesPath(String path) {
+    //TODO
+    return Future.value();
+  }
+
+  @override
+  Future<Database> openDatabase(String path, {OpenDatabaseOptions? options}) async {
     await SqflitePluginWeb.isReady;
-    return _db ??= SqfliteWebDatabase(
-        path: path, readOnly: false, logLevel: sqfliteLogLevelNone);
+    return _db ??= SqfliteWebDatabase(path: path, readOnly: false, logLevel: sqfliteLogLevelNone);
   }
 }
