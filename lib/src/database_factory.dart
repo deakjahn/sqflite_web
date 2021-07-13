@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:sqflite_common/sqlite_api.dart';
 
 import 'sqflite_web.dart';
@@ -42,5 +44,11 @@ class DatabaseFactoryWeb extends DatabaseFactory {
   Future<Database> openDatabase(String path, {OpenDatabaseOptions? options}) async {
     await SqflitePluginWeb.isReady;
     return _db ??= SqfliteWebDatabase(path: path, readOnly: false, logLevel: sqfliteLogLevelNone);
+  }
+
+  /// Load a database from byte data
+  Future<Database> loadDatabase(Uint8List data, {OpenDatabaseOptions? options}) async {
+    await SqflitePluginWeb.isReady;
+    return _db ??= SqfliteWebDatabase.fromData(readOnly: false, logLevel: sqfliteLogLevelNone, data: data);
   }
 }

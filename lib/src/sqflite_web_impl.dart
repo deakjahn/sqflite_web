@@ -85,14 +85,14 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   }
 
   /// Open web database from byte data.
-  SqfliteWebDatabase.fromData({required this.path, required this.readOnly, required this.logLevel, required Uint8List data}) {
+  SqfliteWebDatabase.fromData({required this.readOnly, required this.logLevel, required Uint8List data}) {
     _dbOpen(data);
     _isOpen = true;
   }
 
   /// Path.
   @override
-  final String path;
+  late String path;
 
   /// Transaction reference count.
   ///

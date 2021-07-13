@@ -6,6 +6,11 @@ Future main() async {
   var databaseFactory = databaseFactoryWeb;
   var db = await databaseFactory.openDatabase(inMemoryDatabasePath);
 
+  /*
+  var databaseFactory = databaseFactoryWeb as DatabaseFactoryWeb;
+  var db = await databaseFactory.loadDatabase(inMemoryDatabasePath, data);
+  */
+
   print("Setting the version in the database...");
   await db.setVersion(10);
 
