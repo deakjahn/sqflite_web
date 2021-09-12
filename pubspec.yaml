@@ -1,7 +1,7 @@
 name: sqflite_web
 homepage: https://github.com/tekartik/sqflite/tree/master/sqflite_web
 description: sqflite web implementation (without database persistency)
-version: 2.0.0-nullsafety.1
+version: 2.0.0
 
 flutter:
   plugin:
