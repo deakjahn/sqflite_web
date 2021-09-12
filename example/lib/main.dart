@@ -3,16 +3,13 @@ import 'package:sqflite_web/sqflite_web.dart';
 
 Future main() async {
   print("Opening the database...");
-/*
   var databaseFactory = databaseFactoryWeb;
   var db = await databaseFactory.openDatabase(inMemoryDatabasePath);
 
-  */
-/*
+  /*
   var databaseFactory = databaseFactoryWeb as DatabaseFactoryWeb;
   var db = await databaseFactory.loadDatabase(inMemoryDatabasePath, data);
-  *//*
-
+  */
 
   print("Setting the version in the database...");
   await db.setVersion(10);
@@ -60,5 +57,4 @@ Future main() async {
   }
 
   await db.close();
-*/
 }
