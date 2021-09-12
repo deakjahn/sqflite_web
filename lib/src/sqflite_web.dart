@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:html' as html;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -38,13 +39,13 @@ class SqflitePluginWeb extends PlatformInterface {
       if (script.src.contains('assets/packages/sqflite_web/assets/sqflite_web.js')) foundSqfliteWebJs = true;
     }
 
-    if (!foundRequireJs) {
-      print("WARNING: Importing 'require.js' from sqlite_web, consider importing it directly from your html file like this: '<script src=\"assets/packages/sqflite_web/assets/require.js\" type=\"application/javascript\"></script>'");
+    if (kReleaseMode && !foundRequireJs) {
       html.document.body?.append(html.ScriptElement()
         ..src = 'assets/packages/sqflite_web/assets/require.js' // ignore: unsafe_html
         ..type = 'application/javascript');
     }
     if (!foundSqfliteWebJs) {
+      print("WARNING: Importing 'sqflite_web.js' from sqlite_web, consider importing it directly from your html file like this: '<script src=\"assets/packages/sqflite_web/assets/sqflite_web.js\" type=\"application/javascript\"></script>'");
       html.document.body?.append(html.ScriptElement()
         ..src = 'assets/packages/sqflite_web/assets/sqflite_web.js' // ignore: unsafe_html
         ..type = 'application/javascript');
