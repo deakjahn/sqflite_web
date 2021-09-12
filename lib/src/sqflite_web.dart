@@ -39,14 +39,14 @@ class SqflitePluginWeb extends PlatformInterface {
     }
 
     if (!foundRequireJs) {
-      print("<!> WARNING: Importing 'require.js' from sqlite_web, consider importing it directlty from your html file like this: '<script src=\"assets/packages/sqflite_web/assets/require.js\" type=\"application/javascript\"></script>'");
+      print("WARNING: Importing 'require.js' from sqlite_web, consider importing it directly from your html file like this: '<script src=\"assets/packages/sqflite_web/assets/require.js\" type=\"application/javascript\"></script>'");
       html.document.body?.append(html.ScriptElement()
-        ..src = 'assets/packages/sqflite_web/assets/require.js'
+        ..src = 'assets/packages/sqflite_web/assets/require.js' // ignore: unsafe_html
         ..type = 'application/javascript');
     }
     if (!foundSqfliteWebJs) {
       html.document.body?.append(html.ScriptElement()
-        ..src = 'assets/packages/sqflite_web/assets/sqflite_web.js'
+        ..src = 'assets/packages/sqflite_web/assets/sqflite_web.js' // ignore: unsafe_html
         ..type = 'application/javascript');
     }
   }
