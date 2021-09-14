@@ -51,13 +51,3 @@ void main() {
   (...)
 }
 ```
-
-Add this line in `web/index.html`:
-```html
-<body>
-  <script src="assets/packages/sqflite_web/assets/require.js" type="application/javascript"></script>
-  (...)
-</body>
-```
-Note: The `require.js` library will be added dynamically if you forget to add this line in `index.html`
-(but this will imply users do a 'refresh' of the web page every time they want to access it because of dynamic include issues).
