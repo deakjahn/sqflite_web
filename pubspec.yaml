@@ -38,6 +38,6 @@ dependencies:
   js: ^0.6.3
 
 dev_dependencies:
-  pedantic:
+  flutter_lints: ^1.0.0
   test:
   process_run: '>=0.10.7'
