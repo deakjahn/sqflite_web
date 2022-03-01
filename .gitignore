@@ -30,6 +30,7 @@
 .pub/
 build/
 generated_plugin_registrant.dart
+*.lock
 
 # Android related
 **/android/**/gradle-wrapper.jar
