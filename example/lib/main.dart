@@ -4,23 +4,26 @@ import 'package:sqflite_web/sqflite_web.dart';
 Future main() async {
   print("Opening the database...");
   var databaseFactory = databaseFactoryWeb;
-  var db = await databaseFactory.openDatabase(inMemoryDatabasePath);
+  var db = await databaseFactory.openDatabase(
+    inMemoryDatabasePath,
+    options: OpenDatabaseOptions(
+      version: 10,
+      onCreate: (db, version) async {
+        print("Create a table in the database...");
+        await db.execute('''
+        CREATE TABLE Product (
+            id INTEGER PRIMARY KEY,
+            title TEXT
+        )
+        ''');
+      },
+    ),
+  );
 
   /*
   var databaseFactory = databaseFactoryWeb as DatabaseFactoryWeb;
   var db = await databaseFactory.loadDatabase(inMemoryDatabasePath, data);
   */
-
-  print("Setting the version in the database...");
-  await db.setVersion(10);
-
-  print("Create a table in the database...");
-  await db.execute('''
-  CREATE TABLE Product (
-      id INTEGER PRIMARY KEY,
-      title TEXT
-  )
-  ''');
 
   final ok = await db.transaction<bool>((txn) async {
     await txn.insert('Product', <String, dynamic>{'title': 'Product 1'});
@@ -49,9 +52,9 @@ Future main() async {
     // [{columns: [id, title], rows: [[1, PRODUCT 1], [2, Product 2], [3, Product 3], [4, Product 4], [5, Product 5]]}]
     print(result);
 
-    result = await db.rawQuery('SELECT * FROM Product WHERE title = ?', ['PRODUCT 1']);
-    // [{columns: [id, title], rows: [[1, PRODUCT 1]]}]
-    print(result);
+    result = await db.rawQuery('SELECT * FROM Product WHERE title = ?', ['Product 3']);
+    // [{columns: [id, title], rows: [[1, Product 3]]}]
+    print("last=$result");
   } else {
     print("Failed to do the database transaction...");
   }

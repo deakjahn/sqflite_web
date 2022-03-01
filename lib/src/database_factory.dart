@@ -43,12 +43,20 @@ class DatabaseFactoryWeb extends DatabaseFactory {
   @override
   Future<Database> openDatabase(String path, {OpenDatabaseOptions? options}) async {
     await SqflitePluginWeb.isReady;
-    return _db ??= SqfliteWebDatabase(path: path, readOnly: false, logLevel: sqfliteLogLevelNone);
+    _db ??= SqfliteWebDatabase(path: path, readOnly: options?.readOnly ?? false, logLevel: sqfliteLogLevelNone);
+    options?.onConfigure?.call(_db!);
+    options?.onCreate?.call(_db!, options.version ?? 0);
+    options?.onOpen?.call(_db!);
+    return _db!;
   }
 
   /// Load a database from byte data
   Future<Database> loadDatabase(Uint8List data, {OpenDatabaseOptions? options}) async {
     await SqflitePluginWeb.isReady;
-    return _db ??= SqfliteWebDatabase.fromData(readOnly: false, logLevel: sqfliteLogLevelNone, data: data);
+    _db ??= SqfliteWebDatabase.fromData(readOnly: options?.readOnly ?? false, logLevel: sqfliteLogLevelNone, data: data);
+    options?.onConfigure?.call(_db!);
+    options?.onCreate?.call(_db!, options.version ?? 0);
+    options?.onOpen?.call(_db!);
+    return _db!;
   }
 }
