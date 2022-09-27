@@ -455,10 +455,10 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   }
 
   @override
-  Future<void> endTransaction(SqfliteTransaction txn) async {
+  Future<void> endTransaction(SqfliteTransaction? txn) async {
     // never commit transaction in read-only mode
     if (readOnly != true) {
-      await txnExecute<dynamic>(txn, (txn.successful == true) ? 'COMMIT' : 'ROLLBACK');
+      await txnExecute<dynamic>(txn, (txn!.successful == true) ? 'COMMIT' : 'ROLLBACK');
     }
   }
 
@@ -466,25 +466,25 @@ class SqfliteWebDatabase extends SqfliteDatabase {
   SqfliteTransaction? get txn => null; //???
 
   @override
-  Future<List> txnApplyBatch(SqfliteTransaction txn, SqfliteBatch batch, {bool? noResult, bool? continueOnError}) {
+  Future<List> txnApplyBatch(SqfliteTransaction? txn, SqfliteBatch batch, {bool? noResult, bool? continueOnError}) {
     return txnWriteSynchronized(txn, (_) async {
       final results = <dynamic>[];
 
       for (final op in batch.operations) {
         switch (op['method'] as String) {
           case 'execute':
-            await txn.execute(op['sql'] as String, op['arguments'] as List<dynamic>);
+            await txn!.execute(op['sql'] as String, op['arguments'] as List<dynamic>);
             break;
           case 'insert':
-            final row = await txn.rawInsert(op['sql'] as String, op['arguments'] as List<dynamic>);
+            final row = await txn!.rawInsert(op['sql'] as String, op['arguments'] as List<dynamic>);
             if (noResult != true) results.add(row);
             break;
           case 'query':
-            final result = await txn.rawQuery(op['sql'] as String, op['arguments'] as List<dynamic>);
+            final result = await txn!.rawQuery(op['sql'] as String, op['arguments'] as List<dynamic>);
             if (noResult != true) results.add(result);
             break;
           case 'update':
-            final row = await txn.rawUpdate(op['sql'] as String, op['arguments'] as List<dynamic>);
+            final row = await txn!.rawUpdate(op['sql'] as String, op['arguments'] as List<dynamic>);
             if (noResult != true) results.add(row);
             break;
           default:
