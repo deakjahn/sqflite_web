@@ -1,5 +1,13 @@
 # sqflite_web
 
+## Obsolete
+
+[Sqflite](https://pub.dev/packages/sqflite) now has an experimental but working web implementation: [sqflite_common_ffi_web](https://pub.dev/packages/sqflite_common_ffi_web).
+
+This makes this approach obsolete. Please, try that package instead.
+
+## Original
+
 This is a web version of [sqflite](https://pub.dev/packages/sqflite).
 
 There is no persistence and copies of the same app running in different browser tabs would see different, separate databases.
